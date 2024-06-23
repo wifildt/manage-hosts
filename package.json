@@ -1,9 +1,9 @@
 {
-  "name": "electron-vite-react",
-  "version": "2.2.0",
+  "name": "manage-host",
+  "version": "1.0.0",
   "main": "dist-electron/main/index.js",
-  "description": "Electron Vite React boilerplate.",
-  "author": "草鞋没号 <308487730@qq.com>",
+  "description": "Manage host file",
+  "author": "LDT",
   "license": "MIT",
   "private": true,
   "debug": {
@@ -20,8 +20,7 @@
     "e2e": "playwright test"
   },
   "dependencies": {
-    "electron-updater": "^6.1.8",
-    "vite-plugin-static-copy": "^1.0.5"
+    "electron-updater": "^6.1.8"
   },
   "devDependencies": {
     "@playwright/test": "^1.42.1",
@@ -40,5 +39,45 @@
     "vite": "^5.1.5",
     "vite-plugin-electron": "^0.28.4",
     "vite-plugin-electron-renderer": "^0.14.5"
+  },
+  "build": {
+    "appId": "MANAGE_HOST_LDT",
+    "asar": true,
+    "directories": {
+      "output": "release/1.0.0"
+    },
+    "files": [
+      "dist-electron",
+      "dist"
+    ],
+    "mac": {
+      "artifactName": "manage-host_1.0.0.${ext}",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "manage-host_1.0.0.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "deleteAppDataOnUninstall": false
+    },
+    "publish": {
+      "provider": "generic",
+      "channel": "latest",
+      "url": "https://github.com/electron-vite/electron-vite-react/releases/download/v0.9.9/"
+    }
   }
 }
