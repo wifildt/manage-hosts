@@ -1,38 +1,83 @@
-import { useState } from 'react'
-import UpdateElectron from '@/components/update'
-import logoVite from './assets/logo-vite.svg'
-import logoElectron from './assets/logo-electron.svg'
-import './App.css'
+import React, { useState, useEffect } from "react";
 
-function App() {
-  const [count, setCount] = useState(0)
-  return (
-    <div className='App'>
-      <div className='logo-box'>
-        <a href='https://github.com/electron-vite/electron-vite-react' target='_blank'>
-          <img src={logoVite} className='logo vite' alt='Electron + Vite logo' />
-          <img src={logoElectron} className='logo electron' alt='Electron + Vite logo' />
-        </a>
-      </div>
-      <h1>Electron + Vite + React</h1>
-      <div className='card'>
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className='read-the-docs'>
-        Click on the Electron + Vite logo to learn more
-      </p>
-      <div className='flex-center'>
-        Place static files into the<code>/public</code> folder <img style={{ width: '5em' }} src='./node.svg' alt='Node logo' />
-      </div>
-
-      <UpdateElectron />
-    </div>
-  )
+declare global {
+  interface Window {
+    api: {
+      readHosts: () => Promise<string>;
+      writeHosts: (content: string) => Promise<string>;
+    };
+  }
 }
 
-export default App
+const App: React.FC = () => {
+  const [hostsContent, setHostsContent] = useState<string>("");
+  const [newEntry, setNewEntry] = useState<string>("");
+
+  useEffect(() => {
+    const fetchHosts = async () => {
+      try {
+        const content = await window.api.readHosts();
+        setHostsContent(content);
+      } catch (err) {
+        console.error("Failed to read hosts file:", err);
+      }
+    };
+
+    fetchHosts();
+  }, []);
+
+  const handleAddEntry = async () => {
+    const updatedContent = `${hostsContent}\n${newEntry}`;
+    try {
+      console.log(updatedContent);
+      await window.api.writeHosts(updatedContent);
+      setHostsContent(updatedContent);
+      setNewEntry("");
+    } catch (err) {
+      console.error("Failed to write to hosts file:", err);
+    }
+  };
+
+  const handleDeleteEntry = async (entry: string) => {
+    const updatedContent = hostsContent
+      .split("\n")
+      .filter((line) => line !== entry)
+      .join("\n");
+    try {
+      await window.api.writeHosts(updatedContent);
+      setHostsContent(updatedContent);
+    } catch (err) {
+      console.error("Failed to write to hosts file:", err);
+    }
+  };
+
+  return (
+    <div>
+      <h1>Hosts File Manager</h1>
+      <textarea
+        value={hostsContent}
+        onChange={(e) => setHostsContent(e.target.value)}
+        rows={10}
+        cols={50}
+      />
+      <br />
+      <input
+        type="text"
+        value={newEntry}
+        onChange={(e) => setNewEntry(e.target.value)}
+        placeholder="Add new entry"
+      />
+      <button onClick={handleAddEntry}>Add Entry</button>
+      <ul>
+        {hostsContent.split("\n").map((line, index) => (
+          <li key={index}>
+            {line}
+            <button onClick={() => handleDeleteEntry(line)}>Delete</button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default App;
